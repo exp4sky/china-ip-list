@@ -1,6 +1,5 @@
 name: chn-ip-task
 
-# 触发条件：push到master、手动触发、每8小时定时触发（UTC时间）
 on:
   push:
     branches: [ master ]
@@ -12,13 +11,13 @@ jobs:
   run-get-ip-list:
     runs-on: ubuntu-latest
     steps:
-      # 1. 检出代码（取消浅克隆，避免推送失败）
+      # 1. 检出代码（取消浅克隆，必须配置）
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # 拉取完整仓库历史，必须配置
+          fetch-depth: 0  # 拉取完整历史，避免推送失败
 
-      # 2. 设置服务器时区为东八区
+      # 2. 设置东八区时区
       - name: Set timezone to UTC+8
         run: sudo timedatectl set-timezone 'Asia/Shanghai'
 
@@ -28,18 +27,17 @@ jobs:
         with:
           dotnet-version: 7.0
 
-      # 4. 设置环境变量（统一构建配置+全球化模式）
+      # 4. 设置环境变量
       - name: Set environment variables
         run: |
           echo "DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1" >> $GITHUB_ENV
           echo "DOTNET_BUILD_CONFIGURATION=Release" >> $GITHUB_ENV
 
-      # 5. 恢复项目依赖
+      # 5. 恢复依赖
       - name: Restore dependencies
         run: dotnet restore
-        continue-on-error: false  # 依赖恢复失败直接终止
 
-      # 6. 构建项目（Release模式，与后续文件路径匹配）
+      # 6. 构建项目
       - name: Build project
         run: dotnet build --configuration $DOTNET_BUILD_CONFIGURATION --no-restore
 
@@ -47,22 +45,21 @@ jobs:
       - name: Run app to generate IP files
         run: dotnet run --project china_ip_list.csproj --configuration $DOTNET_BUILD_CONFIGURATION
 
-      # 8. 提交文件（处理无更改场景，避免报错）
+      # 8. 提交文件（处理无更改场景）
       - name: Commit generated files
         run: |
           # 配置git用户信息
           git config --local user.email "mayax@github.com"
           git config --local user.name "mayaxcn"
           
-          # 打印调试信息（方便排查路径问题）
+          # 打印调试信息
           echo "当前工作目录：$(pwd)"
-          echo "生成的文件列表："
           ls -la bin/$DOTNET_BUILD_CONFIGURATION/net7.0/ || echo "目标目录不存在"
           
-          # 删除旧文件（即使文件不存在也不报错）
+          # 删除旧文件（不存在则忽略错误）
           git rm -f chn_ip.txt chnroute.txt chn_ip_v6.txt chnroute_v6.txt || true
           
-          # 复制新生成的文件（相对路径，避免硬编码）
+          # 复制新文件（失败则提示）
           cp bin/$DOTNET_BUILD_CONFIGURATION/net7.0/chn_ip.txt ./ || echo "chn_ip.txt 复制失败"
           cp bin/$DOTNET_BUILD_CONFIGURATION/net7.0/chnroute.txt ./ || echo "chnroute.txt 复制失败"
           cp bin/$DOTNET_BUILD_CONFIGURATION/net7.0/chn_ip_v6.txt ./ || echo "chn_ip_v6.txt 复制失败"
@@ -71,24 +68,26 @@ jobs:
           # 添加文件到暂存区
           git add chn_ip.txt chnroute.txt chn_ip_v6.txt chnroute_v6.txt || true
           
-          # 仅在有文件更改时提交（核心：避免无更改时commit报错）
+          # 仅在有更改时提交
           if git diff --cached --quiet; then
-            echo "⚠️ 没有文件更改，跳过提交"
+            echo "⚠️ 无文件更改，跳过提交"
           else
             git commit -m "更新IP文件: $(date "+%Y-%m-%d %H:%M:%S")"
-            echo "✅ 成功提交文件"
+            echo "✅ 提交成功"
           fi
 
-      # 9. 推送到远程仓库（修复token参数传递，缩进必须严格一致）
-      - name: Push changes to GitHub
-        uses: ad-m/github-push-action@v0.8.0  # 固定稳定版本
-        with:
+      # 9. 原生Git推送（替代易出问题的ad-m Action）
+      - name: Push changes to GitHub (native git)
+        run: |
+          # 配置远程仓库地址（带token授权）
           # 二选一：
-          # 选项1：使用自定义PAT（需在仓库Secrets中配置CHNIP_GIT_KEY）
-          github_token: ${{ secrets.CHNIP_GIT_KEY }}
-          # 选项2：使用GitHub自动生成的临时令牌（无需手动配置，注释掉上面一行，取消下面一行注释）
-          # github_token: ${{ secrets.GITHUB_TOKEN }}
+          # 选项1：使用自定义PAT（CHNIP_GIT_KEY）
+          git remote set-url origin https://mayaxcn:${{ secrets.CHNIP_GIT_KEY }}@github.com/你的用户名/你的仓库名.git
+          # 选项2：使用GitHub自动令牌（无需手动配置，注释上面一行，取消下面一行注释）
+          # git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/你的用户名/你的仓库名.git
           
-          branch: master  # 推送的目标分支
-          force: false    # 不强制推送，更安全
-          directory: .    # 推送的目录（当前工作目录）
+          # 推送提交到master分支
+          git push origin master
+        env:
+          # 避免git推送时的交互提示
+          GIT_TERMINAL_PROMPT: 0

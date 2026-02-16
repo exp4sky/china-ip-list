@@ -9,59 +9,78 @@ on:
 
 jobs:
   run-get-ip-list:
-
     runs-on: ubuntu-latest
-    
     steps:
-    # 检出代码
+    # 检出代码（取消浅克隆，确保能正常推送）
     - name: Checkout
       uses: actions/checkout@v3
-      
+      with:
+        fetch-depth: 0  # 关键：拉取完整仓库历史，避免推送失败
+
     # 设置服务器时区为东八区 
     - name: Set time zone
       run: sudo timedatectl set-timezone 'Asia/Shanghai'
-      
+
     # 设置 .NET 环境
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 7.0  # 使用已发布的稳定版本
 
-    # 设置全球化不变模式
-    - name: Set globalization invariant mode
-      run: echo "DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1" >> $GITHUB_ENV
+    # 设置环境变量（合并全球化模式配置，更规范）
+    - name: Set environment variables
+      run: |
+        echo "DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1" >> $GITHUB_ENV
+        echo "DOTNET_BUILD_CONFIGURATION=Release" >> $GITHUB_ENV  # 统一构建配置
 
     # 恢复依赖
     - name: Install dependencies
       run: dotnet restore
-      
-    # 构建应用
-    - name: Build
-      run: dotnet build --configuration Release --no-restore
-       
-    # 运行应用
-    - name: Run
-      run: dotnet run --project china_ip_list.csproj
+      continue-on-error: false  # 依赖恢复失败直接终止
 
-    # 提交更改到本地
+    # 构建应用（使用统一的Release配置）
+    - name: Build
+      run: dotnet build --configuration $DOTNET_BUILD_CONFIGURATION --no-restore
+
+    # 运行应用（生成IP文件）
+    - name: Run app to generate IP files
+      run: dotnet run --project china_ip_list.csproj --configuration $DOTNET_BUILD_CONFIGURATION
+
+    # 提交更改到本地（处理无更改的情况，避免报错）
     - name: Commit files
       run: |
-         git config --local user.email "mayax@github.com"
-         git config --local user.name "mayaxcn"
-         ls
-         pwd
-         git rm -f chn_ip.txt chnroute.txt chn_ip_v6.txt chnroute_v6.txt
-         git commit -m "删除旧有IP文件!"
-         cp /home/runner/work/china-ip-list/china-ip-list/bin/Debug/net7.0/chn_ip.txt chn_ip.txt
-         cp /home/runner/work/china-ip-list/china-ip-list/bin/Debug/net7.0/chnroute.txt chnroute.txt
-         cp /home/runner/work/china-ip-list/china-ip-list/bin/Debug/net7.0/chn_ip_v6.txt chn_ip_v6.txt
-         cp /home/runner/work/china-ip-list/china-ip-list/bin/Debug/net7.0/chnroute_v6.txt chnroute_v6.txt
-         git add chn_ip.txt chnroute.txt chn_ip_v6.txt chnroute_v6.txt
-         git commit -m "提交新的IP文件，更新于$(date "+%Y-%m-%d %H:%M:%S")"
-         
-    # 推送到远程
+        # 配置git用户信息
+        git config --local user.email "mayax@github.com"
+        git config --local user.name "mayaxcn"
+        
+        # 打印调试信息（可选，方便排查路径问题）
+        echo "当前工作目录：$(pwd)"
+        echo "生成的文件列表："
+        ls -la bin/$DOTNET_BUILD_CONFIGURATION/net7.0/
+        
+        # 删除旧文件（即使文件不存在也不报错）
+        git rm -f chn_ip.txt chnroute.txt chn_ip_v6.txt chnroute_v6.txt || true
+        
+        # 复制新生成的文件（使用相对路径，更健壮）
+        cp bin/$DOTNET_BUILD_CONFIGURATION/net7.0/chn_ip.txt ./
+        cp bin/$DOTNET_BUILD_CONFIGURATION/net7.0/chnroute.txt ./
+        cp bin/$DOTNET_BUILD_CONFIGURATION/net7.0/chn_ip_v6.txt ./
+        cp bin/$DOTNET_BUILD_CONFIGURATION/net7.0/chnroute_v6.txt ./
+        
+        # 添加文件到暂存区
+        git add chn_ip.txt chnroute.txt chn_ip_v6.txt chnroute_v6.txt
+        
+        # 仅在有更改时提交（核心：避免无更改时commit报错）
+        if git diff --cached --quiet; then
+          echo "没有文件更改，跳过提交"
+        else
+          git commit -m "提交新的IP文件，更新于$(date "+%Y-%m-%d %H:%M:%S")"
+        fi
+
+    # 推送到远程（使用固定版本的Action，更稳定）
     - name: Push changes
-      uses: ad-m/github-push-action@master
+      uses: ad-m/github-push-action@v0.8.0  # 固定版本，替代master开发版
       with:
-         github_token: ${{ secrets.CHNIP_GIT_KEY }}
-         branch: master
+        github_token: ${{ secrets.CHNIP_GIT_KEY }}
+        branch: master
+        force: false  # 不强制推送，更安全

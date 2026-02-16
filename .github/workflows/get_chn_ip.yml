@@ -76,7 +76,7 @@ jobs:
           # 替换规则：
           # <你的GitHub用户名> → 比如你的账号是mayaxcn，就写mayaxcn
           # <你的仓库名> → 比如仓库叫china-ip-list，就写china-ip-list
-          git remote set-url origin https://mayaxcn:${{ secrets.CHNIP_GIT_KEY }}@github.com/exp4sky/china-ip-list.git
+          git remote set-url origin https://exp4sky:${{ secrets.CHNIP_GIT_KEY }}@github.com/exp4sky/china-ip-list.git
           
           # 推送提交到master分支
           git push origin master

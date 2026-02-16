@@ -21,11 +21,11 @@ jobs:
       - name: Set timezone to UTC+8
         run: sudo timedatectl set-timezone 'Asia/Shanghai'
 
-      # 3. 配置.NET 7环境
-      - name: Setup .NET 7
+      # 3. 配置.NET 8环境
+      - name: Setup .NET 8
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: 7.0
+          dotnet-version: 8.0
 
       # 4. 设置环境变量
       - name: Set environment variables
@@ -52,13 +52,13 @@ jobs:
           git config --local user.name "exp4sky"
           
           echo "当前工作目录：$(pwd)"
-          ls -la bin/$DOTNET_BUILD_CONFIGURATION/net7.0/ || echo "目标目录不存在"
+          ls -la bin/$DOTNET_BUILD_CONFIGURATION/net8.0/ || echo "目标目录不存在"
           
           git rm -f chn_ip.txt chnroute.txt chn_ip_v6.txt chnroute_v6.txt || true
-          cp bin/$DOTNET_BUILD_CONFIGURATION/net7.0/chn_ip.txt ./ || echo "chn_ip.txt 复制失败"
-          cp bin/$DOTNET_BUILD_CONFIGURATION/net7.0/chnroute.txt ./ || echo "chnroute.txt 复制失败"
-          cp bin/$DOTNET_BUILD_CONFIGURATION/net7.0/chn_ip_v6.txt ./ || echo "chn_ip_v6.txt 复制失败"
-          cp bin/$DOTNET_BUILD_CONFIGURATION/net7.0/chnroute_v6.txt ./ || echo "chnroute_v6.txt 复制失败"
+          cp bin/$DOTNET_BUILD_CONFIGURATION/net8.0/chn_ip.txt ./ || echo "chn_ip.txt 复制失败"
+          cp bin/$DOTNET_BUILD_CONFIGURATION/net8.0/chnroute.txt ./ || echo "chnroute.txt 复制失败"
+          cp bin/$DOTNET_BUILD_CONFIGURATION/net8.0/chn_ip_v6.txt ./ || echo "chn_ip_v6.txt 复制失败"
+          cp bin/$DOTNET_BUILD_CONFIGURATION/net8.0/chnroute_v6.txt ./ || echo "chnroute_v6.txt 复制失败"
           
           git add chn_ip.txt chnroute.txt chn_ip_v6.txt chnroute_v6.txt || true
           

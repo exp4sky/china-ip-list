@@ -73,7 +73,6 @@
 2001:df4:e141:: 2001:df4:e141:ffff:ffff:ffff:ffff:ffff
 2001:df4:e142:: 2001:df4:e143:ffff:ffff:ffff:ffff:ffff
 2001:df5:1440:: 2001:df5:1440:ffff:ffff:ffff:ffff:ffff
-2001:df5:2080:: 2001:df5:2080:ffff:ffff:ffff:ffff:ffff
 2001:df5:2fc0:: 2001:df5:2fc0:ffff:ffff:ffff:ffff:ffff
 2001:df5:44c0:: 2001:df5:44c0:ffff:ffff:ffff:ffff:ffff
 2001:df5:4740:: 2001:df5:4740:ffff:ffff:ffff:ffff:ffff

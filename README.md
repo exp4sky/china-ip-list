@@ -10,9 +10,10 @@ https://github.com/mayaxcn/china-ip-list
 ***************IPV4***************
 路由器使用（Openwrt）直接访问 https://raw.githubusercontent.com/exp4sky/china-ip-list/master/chnroute.txt <br>
 其他客户端使用直接访问 https://raw.githubusercontent.com/exp4sky/china-ip-list/master/chn_ip.txt
+如果用cdn 访问 https://cdn.jsdelivr.net/gh/exp4sky/china-ip-list/chnroute.txt
 
 ***************IPV6***************
 路由器使用（Openwrt）直接访问 https://raw.githubusercontent.com/exp4sky/china-ip-list/master/chnroute_v6.txt <br>
 其他客户端使用直接访问 https://raw.githubusercontent.com/exp4sky/china-ip-list/master/chn_ip_v6.txt
-
+如果用cdn 访问 https://cdn.jsdelivr.net/gh/exp4sky/china-ip-list/chnroute_v6.txt
 

@@ -1534,7 +1534,6 @@
 2405:9bc0:: 2405:9bc0:ffff:ffff:ffff:ffff:ffff:ffff
 2405:9e00:: 2405:9e00:ffff:ffff:ffff:ffff:ffff:ffff
 2405:a240:: 2405:a240:ffff:ffff:ffff:ffff:ffff:ffff
-2405:a3c0:: 2405:a3c0:ffff:ffff:ffff:ffff:ffff:ffff
 2405:a500:: 2405:a500:ffff:ffff:ffff:ffff:ffff:ffff
 2405:a680:: 2405:a680:ffff:ffff:ffff:ffff:ffff:ffff
 2405:a900:: 2405:a900:ffff:ffff:ffff:ffff:ffff:ffff

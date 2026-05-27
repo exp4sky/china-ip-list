@@ -1577,7 +1577,6 @@
 2405:e040:: 2405:e040:ffff:ffff:ffff:ffff:ffff:ffff
 2405:e1c0:: 2405:e1c0:ffff:ffff:ffff:ffff:ffff:ffff
 2405:e600:: 2405:e600:ffff:ffff:ffff:ffff:ffff:ffff
-2405:ed40:: 2405:ed40:ffff:ffff:ffff:ffff:ffff:ffff
 2405:ef40:: 2405:ef43:ffff:ffff:ffff:ffff:ffff:ffff
 2405:f340:: 2405:f340:ffff:ffff:ffff:ffff:ffff:ffff
 2405:f580:: 2405:f580:ffff:ffff:ffff:ffff:ffff:ffff

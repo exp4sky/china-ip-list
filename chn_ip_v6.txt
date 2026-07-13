@@ -45,7 +45,6 @@
 2001:df1:d180:: 2001:df1:d180:ffff:ffff:ffff:ffff:ffff
 2001:df1:da00:: 2001:df1:da00:ffff:ffff:ffff:ffff:ffff
 2001:df1:f480:: 2001:df1:f480:ffff:ffff:ffff:ffff:ffff
-2001:df1:fd80:: 2001:df1:fd80:ffff:ffff:ffff:ffff:ffff
 2001:df2:5780:: 2001:df2:5780:ffff:ffff:ffff:ffff:ffff
 2001:df2:8bc0:: 2001:df2:8bc0:ffff:ffff:ffff:ffff:ffff
 2001:df2:a580:: 2001:df2:a580:ffff:ffff:ffff:ffff:ffff

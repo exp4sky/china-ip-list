@@ -780,6 +780,7 @@
 2402:6f40:: 2402:6f40:ffff:ffff:ffff:ffff:ffff:ffff
 2402:6fc0:: 2402:6fc0:ffff:ffff:ffff:ffff:ffff:ffff
 2402:7040:: 2402:7040:ffff:ffff:ffff:ffff:ffff:ffff
+2402:7060:: 2402:7060:ffff:ffff:ffff:ffff:ffff:ffff
 2402:7080:: 2402:7080:ffff:ffff:ffff:ffff:ffff:ffff
 2402:70c0:: 2402:70c0:ffff:ffff:ffff:ffff:ffff:ffff
 2402:7140:: 2402:7140:ffff:ffff:ffff:ffff:ffff:ffff

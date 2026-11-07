@@ -5,10 +5,10 @@ on:
     branches: [ master ]
   workflow_dispatch:
   schedule:
-    - cron: '0 */8 * * *'   # UTC，即北京时间 08:00 / 16:00 / 00:00
+    - cron: '0 */8 * * *'
 
 permissions:
-  contents: write            # 显式赋予推送权限
+  contents: write
 
 jobs:
   run-get-ip-list:
@@ -18,7 +18,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          persist-credentials: true   # 保留凭证供后续 push
+          persist-credentials: false   # 关键：禁用默认凭证，防止覆盖你的 PAT
+          fetch-depth: 0
 
       - name: Set time zone
         run: sudo timedatectl set-timezone 'Asia/Shanghai'
@@ -38,27 +39,25 @@ jobs:
         run: dotnet build --configuration Release --no-restore
 
       - name: Run
-        timeout-minutes: 3            # 防止程序卡死
+        timeout-minutes: 3
         run: dotnet run --configuration Release --project china_ip_list.csproj --no-build
 
       - name: Commit files
         run: |
           git config --local user.email "mayax@github.com"
           git config --local user.name "mayaxcn"
-
-          # 删除旧文件，不存在也不报错
           git rm -f chn_ip.txt chnroute.txt chn_ip_v6.txt chnroute_v6.txt || true
           git commit -m "删除旧有IP文件!" || echo "nothing to remove"
-
-          # 用 Release 产物路径（与 Build 配置一致）
+          
           OUT="${{ github.workspace }}/bin/Release/net7.0"
           cp "$OUT/chn_ip.txt" "$OUT/chnroute.txt" "$OUT/chn_ip_v6.txt" "$OUT/chnroute_v6.txt" .
-
+          
           git add chn_ip.txt chnroute.txt chn_ip_v6.txt chnroute_v6.txt
           git commit -m "提交新的IP文件，更新于$(date "+%Y-%m-%d %H:%M:%S")"
 
       - name: Push changes
         uses: ad-m/github-push-action@v0.6.0
         with:
-          github_token: ${{ secrets.CHNIP_GIT_KEY }}   # ✅ 必须是 github_token，不是 token！
+          github_token: ${{ secrets.CHNIP_GIT_KEY }}   # 必须是 github_token
+          repository: ${{ github.repository }}         # 显式指定当前仓库
           branch: master

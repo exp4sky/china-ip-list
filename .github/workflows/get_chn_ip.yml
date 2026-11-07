@@ -60,7 +60,8 @@ jobs:
         with:
           token: ${{ secrets.CHNIP_GIT_KEY }}   # 关键：参数名改成 token
           branch: master
-- name: Run
+          
+      - name: Run
         run: dotnet run --configuration Release --project china_ip_list.csproj --no-build
 
       - name: Debug Run result

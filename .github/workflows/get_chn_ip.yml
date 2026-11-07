@@ -38,7 +38,7 @@ jobs:
         run: dotnet build --configuration Release --no-restore
 
       - name: Run
-        timeout-minutes: 3            # 防止程序卡死拖满时限
+        timeout-minutes: 3            # 防止程序卡死
         run: dotnet run --configuration Release --project china_ip_list.csproj --no-build
 
       - name: Commit files
@@ -60,5 +60,5 @@ jobs:
       - name: Push changes
         uses: ad-m/github-push-action@v0.6.0
         with:
-          github_token: ${{ secrets.CHNIP_GIT_KEY }}   # v0.6.0 认这个名字
+          github_token: ${{ secrets.CHNIP_GIT_KEY }}   # ✅ 必须是 github_token，不是 token！
           branch: master

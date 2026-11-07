@@ -1,63 +1,67 @@
 name: chn-ip-task
 
 on:
-  push:
+  push: # push触发
     branches: [ master ]
-  workflow_dispatch:
-  schedule:
-    - cron: '0 */8 * * *'
-
-permissions:
-  contents: write
+  workflow_dispatch: # 手动触发
+  schedule: # 计划任务触发
+    - cron: '0 */8 * * *' # cron表达式，Actions时区是UTC时间
 
 jobs:
   run-get-ip-list:
+
     runs-on: ubuntu-latest
-
+    
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          persist-credentials: false   # 关键：禁用默认凭证，防止覆盖你的 PAT
-          fetch-depth: 0
+    # 检出代码
+    - name: Checkout
+      uses: actions/checkout@v3
+      
+    # 设置服务器时区为东八区 
+    - name: Set time zone
+      run: sudo timedatectl set-timezone 'Asia/Shanghai'
+      
+    # 设置 .NET 环境
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 7.0  # 使用已发布的稳定版本
 
-      - name: Set time zone
-        run: sudo timedatectl set-timezone 'Asia/Shanghai'
+    # 设置全球化不变模式
+    - name: Set globalization invariant mode
+      run: echo "DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1" >> $GITHUB_ENV
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: 7.0
+    # 恢复依赖
+    - name: Install dependencies
+      run: dotnet restore
+      
+    # 构建应用
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+       
+    # 运行应用
+    - name: Run
+      run: dotnet run --project china_ip_list.csproj
 
-      - name: Set globalization invariant mode
-        run: echo "DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1" >> $GITHUB_ENV
-
-      - name: Install dependencies
-        run: dotnet restore
-
-      - name: Build
-        run: dotnet build --configuration Release --no-restore
-
-      - name: Run
-        timeout-minutes: 3
-        run: dotnet run --configuration Release --project china_ip_list.csproj --no-build
-
-      - name: Commit files
-        run: |
-          git config --local user.email "mayax@github.com"
-          git config --local user.name "mayaxcn"
-          git rm -f chn_ip.txt chnroute.txt chn_ip_v6.txt chnroute_v6.txt || true
-          git commit -m "删除旧有IP文件!" || echo "nothing to remove"
-          
-          OUT="${{ github.workspace }}/bin/Release/net7.0"
-          cp "$OUT/chn_ip.txt" "$OUT/chnroute.txt" "$OUT/chn_ip_v6.txt" "$OUT/chnroute_v6.txt" .
-          
-          git add chn_ip.txt chnroute.txt chn_ip_v6.txt chnroute_v6.txt
-          git commit -m "提交新的IP文件，更新于$(date "+%Y-%m-%d %H:%M:%S")"
-
-      - name: Push changes
-        uses: ad-m/github-push-action@v0.6.0
-        with:
-          github_token: ${{ secrets.CHNIP_GIT_KEY }}   # 必须是 github_token
-          repository: ${{ github.repository }}         # 显式指定当前仓库
-          branch: master
+    # 提交更改到本地
+    - name: Commit files
+      run: |
+         git config --local user.email "mayax@github.com"
+         git config --local user.name "mayaxcn"
+         ls
+         pwd
+         git rm -f chn_ip.txt chnroute.txt chn_ip_v6.txt chnroute_v6.txt
+         git commit -m "删除旧有IP文件!"
+         cp /home/runner/work/china-ip-list/china-ip-list/bin/Debug/net7.0/chn_ip.txt chn_ip.txt
+         cp /home/runner/work/china-ip-list/china-ip-list/bin/Debug/net7.0/chnroute.txt chnroute.txt
+         cp /home/runner/work/china-ip-list/china-ip-list/bin/Debug/net7.0/chn_ip_v6.txt chn_ip_v6.txt
+         cp /home/runner/work/china-ip-list/china-ip-list/bin/Debug/net7.0/chnroute_v6.txt chnroute_v6.txt
+         git add chn_ip.txt chnroute.txt chn_ip_v6.txt chnroute_v6.txt
+         git commit -m "提交新的IP文件，更新于$(date "+%Y-%m-%d %H:%M:%S")"
+         
+    # 推送到远程
+    - name: Push changes
+      uses: ad-m/github-push-action@master
+      with:
+         github_token: ${{ secrets.CHNIP_GIT_KEY }}
+         branch: master
